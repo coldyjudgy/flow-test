@@ -9,31 +9,18 @@ export async function setupAccount() {
       // Transactions use fcl.transaction instead of fcl.script
       // Their syntax is a little different too
       fcl.transaction`
-        import Pixori from 0xdb16a5e14c410280
+        import Pixori from 0x05f5f6e2056f588b
 
         transaction {
-          // We want the account's address for later so we can verify if the account was initialized properly
-          let address: Address
-
-
           prepare(account: AuthAccount) {
-            // save the address for the post check
-            self.address = account.address
-
-            let collection <- ExampleNFT.createEmptyCollection()
-
-            // Only initialize the account if it hasn't already been setup
-            if (!Pixori.check(self.address)) {
-             account.save<@ExampleNFT.Collection>(<-collection, to: /storage/NFTCollection)
-             account.link<&{ExampleNFT.NFTReceiver}>(/public/NFTReceiver, target: /storage/NFTCollection)
-             }
+   
+              let collection <- Pixori.createEmptyCollection()
+  
+              account.save<@Pixori.Collection>(<-collection, to: /storage/NFTCollection)
+              account.link<&{Pixori.NFTReceiver}>(/public/NFTReceiver, target: /storage/NFTCollection)
+    
           }
-
-          // verify that the account has been initialized
-          post {
-            Pixori.check(self.address): "Account was not setup"
-          }
-        }
+      }
       `,
       fcl.payer(fcl.authz), // current user is responsible for paying for the transaction
       fcl.proposer(fcl.authz), // current user acting as the nonce

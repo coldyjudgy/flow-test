@@ -1,53 +1,31 @@
-// File: ./src/setup-cluster.js
+// File: ./src/init-cluster.js
 
-import {useState, useEffect} from "react"
+import {useEffect} from "react"
 import {useCurrentUser} from "./hooks/current-user"
-import {useProfile} from "./hooks/profile"
+import {useSetup} from "./hooks/setup"
 
-function ProfileForm() {
+const fmtBool = bool => (bool ? "yes" : "no")
+
+export function SetupCluster({address}) {
   const cu = useCurrentUser()
-  const profile = useProfile(cu.addr)
-  const [name, setName] = useState("")
-  useEffect(() => {
-    setName(profile.name)
-  }, [profile.name])
+  const init = useSetup(address)
+  useEffect(() => init.check(), [address])
 
-  const submit = () => {
-    profile.setName(name)
-  }
-
-  return (
-    <div>
-      <input value={name} onChange={e => setName(e.target.value)} />
-      {profile.isIdle && <button onClick={submit}>Update Name</button>}
-      {profile.isProcessing && <span>PROCESSING</span>}
-    </div>
-  )
-}
-
-export function ProfileCluster({address}) {
-  const profile = useProfile(address)
-  useEffect(() => profile.refetch(), [address])
   if (address == null) return null
 
   return (
     <div>
-      <h3>Profile: {address}</h3>
-      {profile.isCurrentUser && <ProfileForm />}
+      <h3>My Address: {address}</h3>
       <ul>
         <li>
-          <img
-            src={profile.avatar}
-            width="50px"
-            height="50px"
-            alt={profile.name}
-          />
-        </li>
-        <li>
-          <strong>Name: </strong>
-          <span>{profile.name}</span>
-          {profile.isCurrentUser && <span> -You</span>}
-          {profile.isProcessing && <span>PROCESSING</span>}
+          <strong>Setup?: </strong>
+          {init.isIdle && <span>{fmtBool(init.set)}</span>}
+          {!init.set && cu.addr === address && init.isIdle && (
+            <button disabled={init.isProcessing} onClick={init.exec}>
+              Setup Account
+            </button>
+          )}
+          {init.isProcessing && <span>PROCESSING</span>}
         </li>
       </ul>
     </div>

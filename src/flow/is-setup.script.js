@@ -10,7 +10,7 @@ export async function isSetup(address) {
   return fcl
     .send([
       fcl.script`
-        import Pixori from 0xdb16a5e14c410280
+        import Pixori from 0x05f5f6e2056f588b
 
         pub fun main(address: Address): Bool {
           return Pixori.check(address)
